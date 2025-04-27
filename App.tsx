@@ -1,49 +1,65 @@
+/* App.tsx */
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-// Імпортуємо MethodCalculator:
-import { MethodCalculator } from './domain/methodCalculator';
+// Скретч‑типи для навігації
+export type RootStackParamList = {
+  Params: undefined;
+  Solutions: undefined;
+  Composition: { solutionId: string };
+  Review: undefined;
+  Result: {
+    report: string;
+    mobilePhaseVolumeMl?: number;
+    solventsTotals?: Record<string, number>;
+  };
+};
+
+// Імпортуємо екрани
+import ParamsScreen from './screens/ParamsScreen';
+import SolutionsScreen from './screens/SolutionsScreen';
+import CompositionScreen from './screens/CompositionScreen';
+import ReviewScreen from './screens/ReviewScreen';
+import ResultScreen from './screens/ResultScreen';
+
+// Провайдер WizardContext
+import { WizardProvider } from './context/WizardContext';
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
-  // 1. Створюємо екземпляр нашого класу
-  const calc = new MethodCalculator();
-
-  // 2. Парсимо текст (умовно)
-  const rawText = "Flow rate 1.0 ml/min, duration 10 min, extra 10%";
-  const methodData = calc.parseMethod(rawText);
-
-  // 3. Задаємо кількість ін’єкцій (для прикладу)
-  methodData.totalInjections = 5;
-
-  // 4. Викликаємо coreCalculations
-  calc.coreCalculations(methodData);
-
-  // 5. Формуємо звіт
-  const report = calc.generateFinalReport(methodData);
-
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Мій Хроматографічний Додаток</Text>
-      <Text style={styles.sectionTitle}>Звіт:</Text>
-      <Text style={styles.reportText}>{report}</Text>
-    </ScrollView>
+    <WizardProvider>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Params">
+          <Stack.Screen
+            name="Params"
+            component={ParamsScreen}
+            options={{ title: 'Крок 1: Параметри' }}
+          />
+          <Stack.Screen
+            name="Solutions"
+            component={SolutionsScreen}
+            options={{ title: 'Крок 2: Розчини' }}
+          />
+          <Stack.Screen
+            name="Composition"
+            component={CompositionScreen}
+            options={{ title: 'Склад розчину' }}
+          />
+          <Stack.Screen
+            name="Review"
+            component={ReviewScreen}
+            options={{ title: 'Крок 3: Підсумок' }}
+          />
+          <Stack.Screen
+            name="Result"
+            component={ResultScreen}
+            options={{ title: 'Результат' }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </WizardProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#f7f7f7' },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    marginTop: 16,
-    marginBottom: 4,
-  },
-  reportText: {
-    fontSize: 14,
-    lineHeight: 20,
-      },
-});
